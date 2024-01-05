@@ -1,7 +1,8 @@
-import React, { Children } from 'react';
+import React, { Children, useState } from 'react';
 import { ScrollView, Text, View, Image, TextInput, StyleSheet, FlatList, SectionList } from 'react-native';
 import Cat from './src/component/Cat';
 import PizzaTranslator from './src/component/PizzaTranslator';
+import PreviewLayout from './src/component/PreviewLayout';
 
 
 const styles = StyleSheet.create({
@@ -21,6 +22,10 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 18,
     height: 44
+  },
+  box:{
+    width: 50,
+    height: 50
   }
 })
 
@@ -47,6 +52,8 @@ const sections = [
 ]
 
 const App = () => {
+
+  const [selectedValue, setSelectedValue] = useState<string>('column');
 
 
   return (
@@ -88,12 +95,22 @@ const App = () => {
 
     // </View>
 
-    <View style={{height: '100%'}}>
-    <View style={{height: '15%', backgroundColor: 'powderblue'}}/>  
-    <View style={{height: '35%', width:'66%', flex:2, backgroundColor: 'skyblue'}}/>  
-    <View style={{height: '50%', width: '33%', flex:3, backgroundColor: 'steelblue'}}/>  
+    // <View style={{height: '100%'}}>
+    // <View style={{height: '15%', backgroundColor: 'powderblue'}}/>  
+    // <View style={{height: '35%', width:'66%', flex:2, backgroundColor: 'skyblue'}}/>  
+    // <View style={{height: '50%', width: '33%', flex:3, backgroundColor: 'steelblue'}}/>  
 
 
+
+  // </View>
+
+  <View style={{flex: 1}}>
+    <PreviewLayout label={'flexDirection'} values={['column', 'row', 'row-reverse', 'column-reverse']} selectedValue={selectedValue} setSelectedValue={setSelectedValue}>
+      <View style={[styles.box, {backgroundColor: 'red'}]}></View>
+      <View style={[styles.box, {backgroundColor: 'blue'}]}></View>
+      <View style={[styles.box, {backgroundColor: 'green'}]}></View>
+
+    </PreviewLayout>
 
   </View>
   )

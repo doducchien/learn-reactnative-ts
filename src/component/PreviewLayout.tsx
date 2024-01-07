@@ -1,70 +1,83 @@
-import React, { PropsWithChildren } from 'react';
-import { StyleSheet, Text, Touchable, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, PanResponder, Animated, GestureResponderEvent, PanResponderGestureState } from 'react-native';
+
+const DraggableBox = () => {
+    // Sử dụng Animated.ValueXY để theo dõi vị trí của box
+    const pan = useRef(new Animated.ValueXY()).current;
 
 
-type PreviewLayoutProps = PropsWithChildren<{
-    label: string;
-    values: string[];
-    selectedValue: string;
-    setSelectedValue: (value: string) => void;
-}>
+    // Tạo một PanResponder để xử lý cử chỉ kéo
+    const panResponder = useRef(
+        PanResponder.create({
+            // Khi thao tác chạm bắt đầu, component này sẽ trở thành responder
+            onStartShouldSetPanResponder: () => true,
 
+            // Xử lý di chuyển: Cập nhật vị trí của box
+            // onPanResponderMove: (e: GestureResponderEvent, gestureState: PanResponderGestureState) => {
+            //     console.log(gestureState.dx, gestureState.dy)
+            //     // pan.x.setValue(gestureState.dx)
+            //     // pan.y.setValue(gestureState.dy)
+            //     Animated.event(
+            //         [null, { dx: pan.x, dy: pan.y }],
+            //         { useNativeDriver: false }
+            //     )
+            // },
 
-const styles = StyleSheet.create({
-    row: {
-        flexDirection: 'row',
-        flexWrap: 'wrap'
-    },
-    button:{
-        paddingHorizontal: 8,
-        paddingVertical: 6,
-        backgroundColor: 'oldlace',
-        minWidth: '48%',
-        marginHorizontal: '1%',
-        marginBottom: 6,
-        borderRadius: 4
-    },
-    buttonSelected:{
-        backgroundColor: 'coral'
-    },
-    buttonLabel:{
+            onPanResponderMove: Animated.event(
+                [null, { dx: pan.y, dy: pan.x }],
+                { useNativeDriver: false }
+              ),
 
-        fontSize: 12,
-        fontWeight: '500',
-        color: 'coral'
-    },
-    buttonLabelSelected: {
-        color: 'white'
-    },
+            // Khi ngón tay người dùng rời khỏi màn hình, reset vị trí của box
+            onPanResponderRelease: () => {
+                Animated.spring(pan, {
+                    toValue: { x: 0, y: 0 },
+                    friction: 4,
+                    useNativeDriver: false
+                }).start();
+            }
+        })
+    ).current;
 
-    label:{
-        textAlign: 'center',
-        fontSize: 24,
-        marginBottom: 10
-    },
-    container:{
-        flex: 1,
-        marginTop: 8
-    }
-})
-const PreviewLayout = (props: PreviewLayoutProps) => {
-    const { label, values, selectedValue, children, setSelectedValue } = props;
+    useEffect(() => {
+        const panListener = pan.addListener(value => {
+            console.log(value);
+
+        })
+
+        return () => {
+            pan.removeListener(panListener);
+        }
+    }, [])
+
     return (
-        <View style={{ padding: 10, flex: 1, backgroundColor: 'white' }}>
-            <View><Text style={styles.label}>{label}</Text></View>
-            <View style={[styles.row]}>
-                {values.map(value => (
-                    <TouchableOpacity style={[styles.button, selectedValue === value && styles.buttonSelected]} key={value} onPress={()=> setSelectedValue(value)}>
-                        <Text style={[styles.buttonLabel, selectedValue === value && styles.buttonLabelSelected]}>{value}</Text>
-                    </TouchableOpacity>
-                ))}
+        <View style={{flex: 1}}>
+        <Animated.View
+            style={{
+                transform: [{ translateX: pan.x }, { translateY: pan.y }],
+                height: 100,
+                width: 100,
+                borderRadius: 50,
+                backgroundColor: 'blue'
+            }}
+            {...panResponder.panHandlers}
+        />
+                <Animated.View
+            style={{
+                transform: [{ translateX: pan.y }, { translateY: pan.x }],
+                height: 100,
+                width: 100,
+                borderRadius: 50,
+                backgroundColor: 'blue',
+                position: 'relative',
+                top: -100,
+            }}
+            {...panResponder.panHandlers}
+        />
 
-            </View>
-            <View style={[styles.container, {[label]: selectedValue}]}>
-                    {children}
-            </View>
         </View>
-    );
-}
 
-export default PreviewLayout;
+    );
+};
+
+export default DraggableBox;
